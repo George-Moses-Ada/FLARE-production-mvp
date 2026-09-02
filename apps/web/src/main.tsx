@@ -95,10 +95,12 @@ function LiveDemo() {
   const [holders,setHolders] = useState(842);
   const [phase,setPhase] = useState<typeof phases[number]>("ACTIVE");
   const [running,setRunning] = useState(false);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  
   useEffect(() => {
     if (!running) return;
     let n = 842;
-    const timer = setInterval(() => {
+    timerRef.current = setInterval(() => {
       n += n < 997 ? 13 : 1;
       if (n >= 1000) {
         n = 1000;
@@ -109,10 +111,12 @@ function LiveDemo() {
         setTimeout(()=>{setRunning(false); setPhase("ACTIVE"); setHolders(842);},2800);
       } else setHolders(n);
     },65);
-    return ()=>clearInterval(timer);
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
   },[running]);
   return <div className="console-card reveal">
-    <div className="console-top"><span><Radio size={14}/> LIVE AUTOMATION</span><span className="status-dot"/> TESTNET</div>
+    <div className="console-top"><span><Radio size={14}/> LIVE AUTOMATION</span><span><span className="status-dot"/> TESTNET</span></div>
     <div className="console-main">
       <div><small>HOLDER COUNT</small><strong>{holders.toLocaleString()}</strong><span>/ 1,000</span></div>
       <div className="ring" data-phase={phase}><div>{phase}</div></div>
@@ -125,18 +129,26 @@ function LiveDemo() {
 function App() {
   const { isConnected } = useAccount();
   const hero = useRef<HTMLDivElement>(null);
+  
+  const smoothScroll = (e: React.MouseEvent<HTMLAnchorElement>, targetId: string) => {
+    e.preventDefault();
+    const element = document.getElementById(targetId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+  
   useEffect(() => {
     gsap.utils.toArray<HTMLElement>(".reveal").forEach((el) => {
       gsap.fromTo(el,{opacity:0,y:55},{opacity:1,y:0,duration:0.9,ease:"power3.out",scrollTrigger:{trigger:el,start:"top 88%"}});
     });
     gsap.to(".hero-title",{yPercent:-10,ease:"none",scrollTrigger:{trigger:hero.current,scrub:true}});
-    gsap.to(".signal-line",{xPercent:70,ease:"none",scrollTrigger:{trigger:hero.current,scrub:1}});
   },[]);
   return <div className="app">
     <ParticleField/>
     <header className="nav">
-      <a className="brand" href="#"><Flame size={20}/> FLARE</a>
-      <div className="nav-links"><a href="#how">HOW IT WORKS</a><a href="#architecture">ARCHITECTURE</a><a href="#create">CREATE</a></div>
+      <a className="brand" href="#" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}><Flame size={20}/> FLARE</a>
+      <div className="nav-links"><a href="#how" onClick={(e) => smoothScroll(e, 'how')}>HOW IT WORKS</a><a href="#architecture" onClick={(e) => smoothScroll(e, 'architecture')}>ARCHITECTURE</a><a href="#create" onClick={(e) => smoothScroll(e, 'create')}>CREATE</a></div>
       <ConnectButton showBalance={false}/>
     </header>
 
@@ -147,10 +159,10 @@ function App() {
           <div className="eyebrow"><span/> ONCHAIN AUTOMATION PROTOCOL</div>
           <h1 className="hero-title">MAKE YOUR<br/><em>TOKEN</em><br/>PROGRAMMABLE.</h1>
           <p>Turn on-chain events into deterministic actions. Build automation directly around your token.</p>
-          <div className="hero-actions"><a className="primary" href="#create">CREATE A FLARE <ArrowRight size={17}/></a><a className="secondary" href="#how">EXPLORE PROTOCOL <ChevronRight size={16}/></a></div>
+          <div className="hero-actions"><a className="primary" href="#create" onClick={(e) => smoothScroll(e, 'create')}>CREATE A FLARE <ArrowRight size={17}/></a><a className="secondary" href="#how" onClick={(e) => smoothScroll(e, 'how')}>EXPLORE PROTOCOL <ChevronRight size={16}/></a></div>
+          <LiveDemo/>
+          <div className="signal-line"/>
         </div>
-        <LiveDemo/>
-        <div className="signal-line"/>
       </section>
 
       <section className="marquee"><div>EVENTS → CONDITIONS → EXECUTION → TOKENS → EVENTS → CONDITIONS → EXECUTION → TOKENS →</div></section>
@@ -188,7 +200,7 @@ function App() {
 
       <section className="section final-cta">
         <div className="cta-orbit"/>
-        <div className="reveal"><div className="eyebrow"><span/> ROBINHOOD CHAIN TESTNET</div><h2>PROGRAM THE<br/><em>BEHAVIOR.</em></h2><p>Deploy the first programmable-token primitive on Robinhood Chain.</p><a className="primary" href="#create">START BUILDING <Zap size={17}/></a></div>
+        <div className="reveal"><div className="eyebrow"><span/> ROBINHOOD CHAIN TESTNET</div><h2>PROGRAM THE<br/><em>BEHAVIOR.</em></h2><p>Deploy the first programmable-token primitive on Robinhood Chain.</p><a className="primary" href="#create" onClick={(e) => smoothScroll(e, 'create')}>START BUILDING <Zap size={17}/></a></div>
       </section>
     </main>
     <footer><span>FLARE © 2026</span><span>MAKE YOUR TOKEN PROGRAMMABLE.</span><span>TESTNET BUILD</span></footer>
