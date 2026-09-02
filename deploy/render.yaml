@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: flare-api
+    runtime: node
+    rootDir: apps/api
+    buildCommand: npm install && npm run build
+    startCommand: node dist/index.js
+    envVars:
+      - key: RH_RPC_URL
+        sync: false
+      - key: RH_WS_URL
+        sync: false
+      - key: TOKEN_ADDRESS
+        sync: false
+      - key: FLARE_ADDRESS
+        sync: false
+      - key: START_BLOCK
+        sync: false
+      - key: DATABASE_URL
+        sync: false
